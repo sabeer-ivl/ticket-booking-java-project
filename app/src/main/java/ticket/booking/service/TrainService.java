@@ -20,24 +20,20 @@ public class TrainService {
         loadTrains();
     }
 
-    /** Load train list from JSON file */
     private void loadTrains() throws IOException {
         trainList = objectMapper.readValue(new File(TRAIN_DB_PATH), new TypeReference<List<Train>>() {});
     }
 
-    /** Save train list back to JSON file */
     private void saveTrains() throws IOException {
         objectMapper.writeValue(new File(TRAIN_DB_PATH), trainList);
     }
 
-    /** Search trains by source & destination */
     public List<Train> searchTrains(String source, String destination) {
         return trainList.stream()
                 .filter(train -> isValidTrain(train, source, destination))
                 .collect(Collectors.toList());
     }
 
-    /** Add or update a train */
     public void addOrUpdateTrain(Train newTrain) throws IOException {
         Optional<Train> existingTrain = trainList.stream()
                 .filter(t -> t.getTrainId().equalsIgnoreCase(newTrain.getTrainId()))
@@ -52,7 +48,6 @@ public class TrainService {
         saveTrains();
     }
 
-    /** Check if train stops at source and destination in correct order */
     private boolean isValidTrain(Train train, String source, String destination) {
         List<String> stations = train.getStations();
         int sourceIndex = stations.indexOf(source.toLowerCase());

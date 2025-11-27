@@ -30,24 +30,20 @@ public class UserBookingService {
         loadUsers();
     }
 
-    /** Load users from JSON */
     private void loadUsers() throws IOException {
         userList = objectMapper.readValue(new File(USER_FILE_PATH), new TypeReference<List<User>>() {});
     }
 
-    /** Save users to JSON */
     private void saveUsers() throws IOException {
         objectMapper.writeValue(new File(USER_FILE_PATH), userList);
     }
 
-    /** Login check */
     public boolean loginUser() {
         return userList.stream()
                 .anyMatch(u -> u.getName().equals(currentUser.getName()) &&
                         UserServiceUtil.checkPassword(currentUser.getPassword(), u.getHashedPassword()));
     }
 
-    /** Sign up new user */
     public boolean signUp(User newUser) {
         try {
             userList.add(newUser);
@@ -58,13 +54,11 @@ public class UserBookingService {
         }
     }
 
-    /** Fetch current user's booked tickets */
     public void fetchBookings() {
         Optional<User> userOpt = findCurrentUser();
         userOpt.ifPresent(User::printTickets);
     }
 
-    /** Cancel a ticket by ticketId */
     public boolean cancelBooking(String ticketId) {
         Optional<User> userOpt = findCurrentUser();
         if (userOpt.isPresent()) {
@@ -82,7 +76,6 @@ public class UserBookingService {
         return false;
     }
 
-    /** Get trains by source/destination */
     public List<Train> getTrains(String source, String destination) {
         try {
             TrainService trainService = new TrainService();
@@ -92,12 +85,10 @@ public class UserBookingService {
         }
     }
 
-    /** Fetch seats for a train */
     public List<List<Integer>> fetchSeats(Train train) {
         return train.getSeats();
     }
 
-    /** Book a seat on a train */
     public boolean bookTrainSeat(Train train, int row, int seat) {
         try {
             List<List<Integer>> seats = train.getSeats();
@@ -106,7 +97,6 @@ public class UserBookingService {
                     seats.get(row).set(seat, 1);
                     train.setSeats(seats);
                     new TrainService().addOrUpdateTrain(train);
-                    // Add ticket to current user
                     Ticket ticket = new Ticket(/* generate ticket ID etc */);
                     currentUser.getTicketsBooked().add(ticket);
                     saveUsers();
@@ -119,7 +109,6 @@ public class UserBookingService {
         return false;
     }
 
-    /** Helper: find current user in userList */
     private Optional<User> findCurrentUser() {
         return userList.stream()
                 .filter(u -> u.getName().equals(currentUser.getName()) &&
